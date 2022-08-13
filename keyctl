@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+import argparse
+import os
+import sys
+
+PATH = "/sys/devices/platform/tuxedo_keyboard"
+
+def checkHexArgErr(ret, hex):
+    if ret == False:
+        raise argparse.ArgumentTypeError('invalid hex value: {}'.format(hex))
+    else:
+        return ret
+
+def checkHexStripped(hex, num):
+    if len(hex) != num:
+        return False
+    try:
+        int(hex, 16)
+        return "0x" + hex
+    except:
+        return False
+
+def checkHex(hex, num):
+    if len(hex) < num:
+        raise argparse.ArgumentTypeError('invalid hex value: {}'.format(hex))
+    if hex[0] == '0' and (hex[1] == 'x' or hex[1] == 'X'):
+        return checkHexArgErr(checkHexStripped(hex[2:], num), hex)
+    return checkHexArgErr(checkHexStripped(hex, num), hex)
+
+def checkHex2(hex):
+    return checkHex(hex, 2)
+
+def checkHex6(hex):
+    return checkHex(hex, 6)
+
+def parseArgs():
+    parser = argparse.ArgumentParser(description="Control color and brightness or Tuxedo Keyboards.")
+    parser.add_argument('-c',
+        metavar="color",
+        type=checkHex6,
+        help="color of the keyboard (0xFFFFFF)")
+    parser.add_argument('-b',
+        metavar="brightness",
+        type=checkHex2,
+        help="brightness of the keyboard (0xFF)")
+    parser.add_argument('-g',
+        action="store_true",
+        help="get current value")
+    args = vars(parser.parse_args())
+    if args["c"] == None and args["b"] == None and args["g"] == False:
+        parser.print_help()
+        sys.exit()
+    return args
+
+if __name__ == "__main__":
+    args = parseArgs()
+    if args["c"] is not None:
+        os.system('echo "{}" > {}/color_left'.format(args["c"], PATH))
+    if args["b"] is not None:
+        os.system('echo "{}" > {}/brightness'.format(args["b"], PATH))
+    if args["g"] is not False:
+        file = open("{}/brightness".format(PATH), "r")
+        print("Brightness:\t0x{:02x}".format(int(file.read().strip())))
+        file.close()
+        file = open("{}/brightness".format(PATH), "r")
+        print("Color:\t\t0x{:06x}".format(int(file.read().strip())))
+        file.close()

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Keyboard Controller
+Comment=GUI Keyboard Controller for Tuxedo
+GenericName=Internet Messenger
+Exec=/usr/bin/KeyboardControllerWidget.py
+Icon=/usr/share/pixmaps/input-keyboard-symbolic.svg
+Type=Application
+Categories=Utilities;
+Path=/usr/bin
